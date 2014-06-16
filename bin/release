@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require File.expand_path('../lib/tasks/release_thor.rb', File.dirname(__FILE__))
+
+Release.start
