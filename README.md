@@ -1,7 +1,10 @@
 # Releasetool
 
-TODO: Write a gem description
+We use this tool to create releases and their documentation.
+It makes versioned/numbered deployments easier to track.y
+Would be nice if there was an engine to display the release notes in a rails app as well.
 
+Not quite one-click release, but getting there...
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -18,17 +21,22 @@ Or install it yourself as:
 
 ## Usage
 
-### Prepare release notes
+### Prepare release notes and update version file
 
 ```release prepare -s OLD_RELEASE NEW_RELEASE_VERSION```
 
-### Commit release notes
 
-```release commit```
+### Commit release notes and create tag
 
-Currently this also commits config/initializers/00-version.rb as this is handy for our rails projects. Might move this
- out into a config, but only if need this to span non-rails projects.
-  
+```release commit NEW_RELEASE_VERSION```
+
+Currently this also commits config/initializers/00-version.rb as this is handy for our rails  projects. Might move this out into a config (or make check for the existings of , but only if need this to span non-rails projects.
+
+### Push commits and tag
+
+```release push NEW_RELEASE_VERSION```
+
+
 ## Contributing
 
 1. Fork it
