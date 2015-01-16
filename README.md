@@ -18,8 +18,17 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Prepare release notes
 
+```release prepare -s OLD_RELEASE NEW_RELEASE_VERSION```
+
+### Commit release notes
+
+```release commit```
+
+Currently this also commits config/initializers/00-version.rb as this is handy for our rails projects. Might move this
+ out into a config, but only if need this to span non-rails projects.
+  
 ## Contributing
 
 1. Fork it
