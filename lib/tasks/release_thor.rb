@@ -3,6 +3,14 @@ class Release < Thor
 
   DIR = "release_notes"
   VERSION_FILE = "config/initializers/00-version.rb" # should be a config var
+
+  desc "list", <<-END
+    show a list of tags ordered by date (just a git listing).
+    END
+
+  def list
+    system("git for-each-ref --sort='*authordate' --format='%(taggerdate:short) | %(tag) | %(contents)' refs/tags")
+  end
   method_option :since, type: :string, desc: "since commit_ref", required: true, aliases: 's'
   method_option :edit, type: :boolean, desc: "edit", required: false, aliases: 'e'
 

@@ -21,6 +21,10 @@ Or install it yourself as:
 
 ## Usage
 
+### List existing tags
+
+```release list```
+
 ### Prepare release notes and update version file
 
 ```release prepare -s OLD_RELEASE NEW_RELEASE_VERSION```
