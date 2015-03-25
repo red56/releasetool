@@ -68,11 +68,13 @@ Works well if the PREVIOUS_VERSION is a git tag and the NEW_VERSION is the next 
         system("open #{notes_file}")
       end
     end
-    if previous_version[0]=='v' && new_version[0]=='v'
-      from_version = previous_version[1..-1]
-      to_version = new_version[1..-1]
-      guarded_system("cat #{VERSION_FILE} | sed s/#{from_version}/#{to_version.gsub('.', '\.')}/ > #{VERSION_FILE}.tmp")
-      guarded_system("mv #{VERSION_FILE}.tmp #{VERSION_FILE}")
+    if File.exists?(VERSION_FILE)
+      if previous_version[0]=='v' && new_version[0]=='v'
+        from_version = previous_version[1..-1]
+        to_version = new_version[1..-1]
+        guarded_system("cat #{VERSION_FILE} | sed s/#{from_version}/#{to_version.gsub('.', '\.')}/ > #{VERSION_FILE}.tmp")
+        guarded_system("mv #{VERSION_FILE}.tmp #{VERSION_FILE}")
+      end
     end
   end
 
@@ -85,8 +87,8 @@ Works well if the PREVIOUS_VERSION is a git tag and the NEW_VERSION is the next 
   def commit(version=nil)
     version ||= stored_version
     guarded_system("git add #{DIR}")
-    guarded_system("git add #{VERSION_FILE}")
-    guarded_system("git commit #{DIR} #{VERSION_FILE} -e -m \"#{DEFAULT_COMMIT_MESSAGE}\"")
+    guarded_system("git add #{VERSION_FILE}") if File.exists?(VERSION_FILE)
+    guarded_system("git commit #{DIR} #{File.exists?(VERSION_FILE) ? VERSION_FILE : ''} -e -m\"#{DEFAULT_COMMIT_MESSAGE}\"")
   end
 
   desc "tag (NEW_VERSION)", <<-END
