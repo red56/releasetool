@@ -1,10 +1,11 @@
 # Releasetool
 
 We use this tool to create releases and their documentation.
-It makes versioned/numbered deployments easier to track.y
-Would be nice if there was an engine to display the release notes in a rails app as well.
+It makes versioned/numbered deployments easier to track.
+Would possibly be nice if there was an engine to display the release notes in a rails app as well.
 
 Not quite one-click release, but getting there...
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -25,23 +26,44 @@ Or install it yourself as:
 
 ```release list```
 
-### Prepare release notes and update version file
+### Start the release release notes and update version file
 
-```release prepare -s OLD_RELEASE NEW_RELEASE_VERSION```
+```release start -s PREVIOUS_VERSION NEW_VERSION```
 
+Now edit the created release notes (release_notes/NEW_VERSION.md)
 
-### Commit release notes and create tag
+### Commit release notes
 
-```release commit NEW_RELEASE_VERSION```
+```release commit```
 
 Currently this also commits config/initializers/00-version.rb as this is handy for our rails  projects. Might move this out into a config (or make check for the existings of , but only if need this to span non-rails projects.
 
+### Create a named tag (for later reference using release list)
+
+```release tag```
+
+It will ask for a one-line summary of the release (full details are in the release notes)
+
 ### Push commits and tag
 
-```release push NEW_RELEASE_VERSION```
+```release push```
 
+
+## Testing
+
+The tests work on a known-good repo stored in `spec/fixtures/example_with_releases.tar`. To recreate this:
+```
+cd spec/fixtures/example_with_releases && tar -xvf ../example_with_releases.tar  && cd -
+```
+
+then you can tweak it and save it back with:
+```
+cd spec/fixtures/example_with_releases && tar -cvf ../example_with_releases.tar . && cd -
+```
 
 ## Contributing
+
+see testing above
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
