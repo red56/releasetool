@@ -2,7 +2,7 @@ require 'thor'
 class Release < Thor
 
   DIR = "release_notes"
-  VERSION_FILE = "config/initializers/00-version.rb" # should be a config var
+  VERSION_FILE = ENV['RELEASETOOL_VERSION_FILE'] || "config/initializers/00-version.rb" #rails out of box
   RELEASE_MARKER_FILE = ".RELEASE_NEW_VERSION" # should be a config var
 
   desc "list", <<-END
