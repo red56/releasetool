@@ -110,13 +110,25 @@ Works well if the PREVIOUS_VERSION is a git tag and the NEW_VERSION is the next 
     version ||= stored_version
     guarded_system("git push")
     guarded_system("git push origin #{version}")
-    guarded_system("rm #{RELEASE_MARKER_FILE}") if File.exist?(RELEASE_MARKER_FILE)
+    remove_stored_version
+  end
+
+  desc "abort", <<-END
+      throws away the version stored by release start.
+  END
+
+  def abort
+    remove_stored_version
   end
 
   no_tasks do
     def stored_version
       fail Thor::Error.new("No stored version... did you forget to do release start?") unless File.exist?(RELEASE_MARKER_FILE)
       File.read(RELEASE_MARKER_FILE).strip
+    end
+
+    def remove_stored_version
+      guarded_system("rm #{RELEASE_MARKER_FILE}") if File.exist?(RELEASE_MARKER_FILE)
     end
 
     def guarded_system(command)
