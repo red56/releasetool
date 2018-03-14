@@ -18,7 +18,7 @@ module Releasetool
         "##{@version} Release Notes",
         "",
         "*Changes since ##{@previous}*",
-        "",
+        "\n",
       ].join("\n")
       puts headers
       commits = `git log #{@previous}..HEAD --pretty=format:"- %B"`
