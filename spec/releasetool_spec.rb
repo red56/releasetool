@@ -29,6 +29,8 @@ describe Release, quietly: true do
   let(:v_0_0_1) {Releasetool::Version.new("v0.0.1")}
   let(:v_0_0_2) {Releasetool::Version.new("v0.0.2")}
   let(:v_0_0_3) {Releasetool::Version.new("v0.0.3")}
+  let(:v_0_1_0) {Releasetool::Version.new("v0.1.0")}
+  let(:v_1_0_0) {Releasetool::Version.new("v1.0.0")}
 
   context "when it receives a start" do
     context "with a since" do
@@ -52,11 +54,40 @@ describe Release, quietly: true do
         expect { subject.start('v0.0.3') }.to raise_error
       end
     end
+
     context "without a since" do
       it "it should use latest tag" do
         expect(Releasetool::Release).to receive(:new).with(v_0_0_3, previous: v_0_0_1).and_return(mock_target)
         expect(mock_target).to receive(:prepare)
         subject.start('v0.0.3')
+      end
+    end
+
+    context "without a new version" do
+      it "it should use next patch level" do
+        expect(Releasetool::Release).to receive(:new).with(v_0_0_2, previous: v_0_0_1).and_return(mock_target)
+        expect(mock_target).to receive(:prepare)
+        subject.start
+      end
+    end
+
+    context "without a new version but with --minor modifier" do
+      subject { Release.new([], {minor: true}, {}) }
+
+      it "it should use next minor level" do
+        expect(Releasetool::Release).to receive(:new).with(v_0_1_0, previous: v_0_0_1).and_return(mock_target)
+        expect(mock_target).to receive(:prepare)
+        subject.start
+      end
+    end
+
+    context "without a new version but with --major modifier" do
+      subject { Release.new([], {major: true}, {}) }
+
+      it "it should use next minor level" do
+        expect(Releasetool::Release).to receive(:new).with(v_1_0_0, previous: v_0_0_1).and_return(mock_target)
+        expect(mock_target).to receive(:prepare)
+        subject.start
       end
     end
   end

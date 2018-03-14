@@ -26,15 +26,23 @@ Or install it yourself as:
 
 ```release list```
 
-### Start the release release notes and update version file
+### Start the release -- generate release notes and update version file
+
+```release start```
+
+This will start a new patch verison, but you can start minor or major 
+
+```release start --minor```
+
+```release start --major```
+
+Or you can specify the new verison. 
 
 ```release start NEW_VERSION```
 
-It will use most recent tag as the previous version. If you don't have a most recent tag, or you want to start from something else use:
+All of these will use the most recent tag as the previous version. If you don't have a most recent tag, or you want to start from something else use:
 
 ```release start -s PREVIOUS_VERSION NEW_VERSION```
-
-release(new_version).prepare(edit: options[:edit])
 
 Now edit the created release notes (release_notes/NEW_VERSION.md)
 

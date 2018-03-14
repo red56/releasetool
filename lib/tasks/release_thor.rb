@@ -18,12 +18,13 @@ class Release < Thor
   method_option :since, type: :string, desc: "since commit_ref (or will use most recent tag)", required: false,
     aliases: 's'
   method_option :edit, type: :boolean, desc: "edit", required: false, aliases: 'e'
+  method_option :minor, type: :boolean, desc: "minor version", required: false, default: false
 
-  desc "start NEW_VERSION", <<-END
+  desc "start (NEW_VERSION)", <<-END
     Start a release by doing a prepare, and storing the target release in #{RELEASE_MARKER_FILE}.
   END
 
-  def start(new_version)
+  def start(new_version=nil)
     if File.exists?(RELEASE_MARKER_FILE)
       raise Thor::Error.new("Can't start when already started on a version. release abort or release finish")
     end
@@ -79,11 +80,22 @@ class Release < Thor
   protected
   def release(new_version)
     Releasetool::Release.new(
-      Releasetool::Version.new(new_version),
-       previous: Releasetool::Version.new(previous_version))
+      next_version(new_version),
+       previous: previous_version)
+  end
+
+  def next_version(new_version)
+    return Releasetool::Version.new(new_version) if new_version
+    if options[:major]
+      previous_version.next_major
+    elsif options[:minor]
+      previous_version.next_minor
+    else
+      previous_version.next_patch
+    end
   end
 
   def previous_version
-    options[:since] || `git describe --abbrev=0 --tags`.strip
+    Releasetool::Version.new(options[:since] || `git describe --abbrev=0 --tags`.strip)
   end
 end
