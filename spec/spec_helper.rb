@@ -2,17 +2,16 @@ $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'releasetool'
 
 RSpec.configure do |config|
-  def capture(stream)
-    begin
-      stream = stream.to_s
-      eval "$#{stream} = StringIO.new"
-      yield
-      result = eval("$#{stream}").string
-    ensure
-      eval("$#{stream} = #{stream.upcase}")
+  config.around quietly: true do |example|
+    RSpec.configure do |config|
+      original_stderr = $stderr
+      original_stdout = $stdout
+      # Redirect stderr and stdout
+      $stderr = File.open(File::NULL, "w")
+      $stdout = File.open(File::NULL, "w")
+      example.run
+      $stderr = original_stderr
+      $stdout = original_stdout
     end
-
-    result
   end
-
 end

@@ -28,7 +28,13 @@ Or install it yourself as:
 
 ### Start the release release notes and update version file
 
+```release start NEW_VERSION```
+
+It will use most recent tag as the previous version. If you don't have a most recent tag, or you want to start from something else use:
+
 ```release start -s PREVIOUS_VERSION NEW_VERSION```
+
+release(new_version).prepare(edit: options[:edit])
 
 Now edit the created release notes (release_notes/NEW_VERSION.md)
 
@@ -64,7 +70,7 @@ cd spec/fixtures/example_with_releases && tar -cvf ../example_with_releases.tar 
 ## Configuration
 
 If you want it to automatically update the version number in a string then set the environment variable
- `RELEASETOOL_VERSION_FILE`, eg. `export RELEASETOOL_VERSION_FILE=./lib/releasetool/version.rb`. By default this is configured to config/initializers/00-version.rb (useful for rails projects).
+ `RELEASETOOL_VERSION_FILE`, eg. `export RELEASETOOL_VERSION_FILE=./lib/releasetool.rb`. By default this is configured to config/initializers/00-version.rb (useful for rails projects).
 
 
 ## Contributing

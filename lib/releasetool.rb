@@ -1,5 +1,5 @@
-require "releasetool/version"
+require "releasetool/release"
 
 module Releasetool
-  # Your code goes here...
+  VERSION = "0.0.3"
 end
