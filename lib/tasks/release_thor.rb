@@ -24,14 +24,15 @@ class Release < Thor
     Start a release by doing a prepare, and storing the target release in #{RELEASE_MARKER_FILE}.
   END
 
-  def start(new_version=nil)
+  def start(specified_version=nil)
     if File.exists?(RELEASE_MARKER_FILE)
       raise Thor::Error.new("Can't start when already started on a version. release abort or release finish")
     end
+    version = next_version(specified_version)
     File.open(RELEASE_MARKER_FILE, 'w') do |f|
-      f.write(new_version)
+      f.write(version)
     end
-    release(new_version).prepare(edit: options[:edit])
+    Releasetool::Release.new(version, previous: previous_version).prepare(edit: options[:edit])
   end
 
   DEFAULT_COMMIT_MESSAGE = 'preparing for release [CI SKIP]'
@@ -78,14 +79,9 @@ class Release < Thor
   end
 
   protected
-  def release(new_version)
-    Releasetool::Release.new(
-      next_version(new_version),
-       previous: previous_version)
-  end
 
-  def next_version(new_version)
-    return Releasetool::Version.new(new_version) if new_version
+  def next_version(specified)
+    return Releasetool::Version.new(specified) if specified
     if options[:major]
       previous_version.next_major
     elsif options[:minor]
