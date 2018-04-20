@@ -32,7 +32,7 @@ describe Release, quietly: true do
   let(:v_0_1_0) {Releasetool::Version.new("v0.1.0")}
   let(:v_1_0_0) {Releasetool::Version.new("v1.0.0")}
 
-  context "when it receives a start" do
+  context "start" do
     context "with a since" do
       subject { Release.new([], {since: 'v0.0.2'}, {}) }
       it "it should do a prepare and store a file" do
@@ -89,6 +89,24 @@ describe Release, quietly: true do
         expect(mock_target).to receive(:prepare)
         subject.start
       end
+    end
+  end
+
+  describe "latest" do
+    it "outputs latest version" do
+      expect{subject.latest}.to output("v0.0.1\n").to_stdout
+    end
+  end
+
+  describe "log" do
+    it "executes correct git log code" do
+      expect(subject).to receive(:guarded_system).with("git log v0.0.1..")
+      subject.log
+    end
+
+    it "allow other args" do
+      expect(subject).to receive(:guarded_system).with("git log v0.0.1.. --stat --reverse")
+      subject.log("--stat", "--reverse")
     end
   end
 
