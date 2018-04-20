@@ -14,6 +14,28 @@ class Release < Thor
     system("git for-each-ref --sort='*authordate' --format='%(taggerdate:short) | %(tag) | %(contents)' refs/tags")
   end
 
+  # ========================
+
+  desc "latest", <<-END
+    output the latest version (tag)
+  END
+
+  def latest
+    puts previous_version
+  end
+
+  # ========================
+
+  desc "log", <<-END
+    output the latest version (tag)
+  END
+
+  def log(*args)
+    extra = " #{args.join(" ")}" if args.length > 0
+    guarded_system("git log #{previous_version}..#{extra}")
+  end
+
+  # ========================
 
   method_option :since, type: :string, desc: "since commit_ref (or will use most recent tag)", required: false,
     aliases: 's'
