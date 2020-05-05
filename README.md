@@ -91,4 +91,10 @@ see testing above
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
+
+## Releasing
+
 For releasing the releasetool itself we need to set an environment variable `export RELEASETOOL_VERSION_FILE=./lib/releasetool/version.rb`
+
+and after doing `release push`, we do 
+`rake release` to release the gem
