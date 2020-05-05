@@ -20,9 +20,12 @@ module Releasetool
       notes_file = "#{DIR}/#{@version}.md"
       if File.exists?(notes_file)
         puts "-"*80
-        puts " File '#{notes_file}' already exists"
+        puts " File '#{notes_file}' already exists (appending)"
         puts "-"*80
-        puts notes
+        File.open(notes_file, 'a') do |f|
+          f.puts("\n\nAPPENDED:\n\n")
+          f.puts(notes)
+        end
       else
         ensure_dir
         File.open(notes_file, 'w') do |f|
