@@ -14,12 +14,6 @@ module Releasetool
     end
 
     def prepare(edit: false)
-      headers = [
-        "##{@version} Release Notes",
-        "",
-        "*Changes since ##{@previous}*",
-        "\n",
-      ].join("\n")
       puts headers
       commits = `git log #{@previous}..HEAD --pretty=format:"- %B"`
       notes = commits.gsub("\n\n", "\n")
@@ -30,7 +24,7 @@ module Releasetool
         puts "-"*80
         puts notes
       else
-        Dir.mkdir(DIR) unless File.exists?(DIR)
+        ensure_dir
         File.open(notes_file, 'w') do |f|
           f.puts(headers)
           f.puts(notes)
@@ -47,5 +41,38 @@ module Releasetool
         guarded_system("mv #{VERSION_FILE}.tmp #{VERSION_FILE}")
       end
     end
+
+    private
+
+    def ensure_dir
+      Dir.mkdir(DIR) unless File.exists?(DIR)
+    end
+
+    def headers
+      @headers ||= template.gsub("$VERSION", @version.to_s).gsub("$PREVIOUS", @previous.to_s)
+    end
+
+    def template
+      File.read(ensured_template_file)
+    end
+
+    def ensured_template_file
+      ensure_dir
+      template_file = "#{DIR}/#{TEMPLATE_FILE}"
+      create_template_file(template_file) unless File.exists?(template_file)
+      template_file
+    end
+
+    def create_template_file(template_file)
+      File.open(template_file, "w") do |f|
+        f.write <<~FILEEND
+        $VERSION Release Notes
+        
+        *Changes since $PREVIOUS*
+
+        FILEEND
+      end
+    end
+
   end
 end
