@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "releasetool/util"
+require "fileutils"
 
 module Releasetool
   class Release
