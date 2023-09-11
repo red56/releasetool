@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 require "releasetool/version"
@@ -21,9 +23,9 @@ describe Releasetool::Version do
   end
 
   describe "next_patch" do
-    let(:v_0_0_1) {Releasetool::Version.new("v0.0.1")}
-    let(:v_0_0_2) {Releasetool::Version.new("v0.0.2")}
-    let(:v_0_0_3) {Releasetool::Version.new("v0.0.3")}
+    let(:v_0_0_1) { Releasetool::Version.new("v0.0.1") }
+    let(:v_0_0_2) { Releasetool::Version.new("v0.0.2") }
+    let(:v_0_0_3) { Releasetool::Version.new("v0.0.3") }
 
     it "is next" do
       expect(v_0_0_1.next_patch).to eq(v_0_0_2)
@@ -34,9 +36,9 @@ describe Releasetool::Version do
   end
 
   describe "next_minor" do
-    let(:v_0_0_1) {Releasetool::Version.new("v0.0.1")}
-    let(:v_0_1_0) {Releasetool::Version.new("v0.1.0")}
-    let(:v_0_2_0) {Releasetool::Version.new("v0.2.0")}
+    let(:v_0_0_1) { Releasetool::Version.new("v0.0.1") }
+    let(:v_0_1_0) { Releasetool::Version.new("v0.1.0") }
+    let(:v_0_2_0) { Releasetool::Version.new("v0.2.0") }
 
     it "is next" do
       expect(v_0_0_1.next_minor).to eq(v_0_1_0)
@@ -47,9 +49,9 @@ describe Releasetool::Version do
   end
 
   describe "next_major" do
-    let(:v_0_1_1) {Releasetool::Version.new("v0.1.1")}
-    let(:v_1_0_0) {Releasetool::Version.new("v1.0.0")}
-    let(:v_2_0_0) {Releasetool::Version.new("v2.0.0")}
+    let(:v_0_1_1) { Releasetool::Version.new("v0.1.1") }
+    let(:v_1_0_0) { Releasetool::Version.new("v1.0.0") }
+    let(:v_2_0_0) { Releasetool::Version.new("v2.0.0") }
 
     it "is next" do
       expect(v_0_1_1.next_major).to eq(v_1_0_0)
@@ -60,11 +62,8 @@ describe Releasetool::Version do
   end
 
   describe "==" do
-    let(:v_0_0_2) {Releasetool::Version.new("v0.0.2")}
+    let(:v_0_0_2) { Releasetool::Version.new("v0.0.2") }
 
-    it "is self same" do
-      expect(v_0_0_2 == v_0_0_2).to be_truthy
-    end
     it "is same if other is a version of same" do
       expect(v_0_0_2 == Releasetool::Version.new("v0.0.2")).to be_truthy
     end

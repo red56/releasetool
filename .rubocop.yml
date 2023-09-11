@@ -1,0 +1,117 @@
+inherit_from: .rubocop_todo.yml
+
+#require:
+#  - rubocop-performance
+#  - rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 2.7
+  DefaultFormatter: fuubar
+  Exclude:
+    - 'tmp/**/*'
+  DisplayCopNames: true
+  NewCops: enable
+  CacheRootDirectory: tmp # ie. tmp/rubocop_cache
+  UseCache: true
+
+Gemspec/DevelopmentDependencies:
+  EnforcedStyle: gemspec
+
+# Don't like this, it's too annoying
+Layout/LineLength:
+  Max: 120
+  Enabled: false
+
+Layout/ParameterAlignment:
+  EnforcedStyle: with_fixed_indentation
+
+Lint/AmbiguousBlockAssociation:
+  Enabled: true
+  Exclude:
+    - "spec/**/*" # https://github.com/rubocop/rubocop/issues/4222
+
+Lint/AssignmentInCondition:
+  AutoCorrect: false
+
+Lint/UnusedBlockArgument:
+  AutoCorrect:  false
+
+Lint/UnusedMethodArgument:
+  AutoCorrect:  false
+
+Metrics/AbcSize:
+  Enabled: false
+  # I don't think this is something we want to enforce (yet?)
+
+Metrics/BlockLength:
+  AllowedMethods:
+    - "no_commands" # thor
+  Exclude:
+    - "spec/**/*.rb"
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+  # No (not yet)
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Naming/AccessorMethodName:
+  Enabled: false
+  # In theory this is good. In practice lots of false errors
+
+## I'm not very keen on this one
+#Performance/TimesMap:
+#  Enabled: false
+
+## I can't see the value of this
+#RSpec/DescribeClass:
+#  Enabled: false
+
+#RSpec/EmptyExampleGroup:
+#  # we need to fix manually - e.g. fill it in or delete it
+#  AutoCorrect: false
+#
+## prefer this
+#RSpec/ExpectChange:
+#  EnforcedStyle: block
+#
+## I can't see the value of this
+#RSpec/MultipleMemoizedHelpers:
+#  Enabled: false
+#
+## This is actually wrong and a mistake (`expect ... to receive ... and return ...` is good practice)
+#RSpec/StubbedMock:
+#  Enabled: false
+
+
+Style/BlockDelimiters:
+  Exclude:
+    - 'spec/**/*'
+
+Style/Documentation:
+  Enabled: false
+  # Sounds good, but really?
+
+Style/DoubleNegation:
+  Enabled: false
+  # double negation is an ok way to enforce true / false when assigning
+
+Style/NumericLiterals:
+  Enabled: false
+  # This is a pain, most long numeric literals are things like ids or times as numbers
+
+Style/StringLiterals:
+  Enabled: true
+  EnforcedStyle: double_quotes
+
+Style/SymbolProc:
+  Enabled: true
+  AllowMethodsWithArguments: true
+  AllowComments: true
