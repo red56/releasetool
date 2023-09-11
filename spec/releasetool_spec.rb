@@ -34,7 +34,7 @@ describe Release, quietly: true do
   let(:v_0_1_0) { Releasetool::Version.new("v0.1.0") }
   let(:v_1_0_0) { Releasetool::Version.new("v1.0.0") }
 
-  context "start" do
+  describe "start" do
     context "with a since" do
       subject { Release.new([], { since: 'v0.0.2' }, {}) }
       it "it should do a prepare and store a file" do
@@ -46,8 +46,8 @@ describe Release, quietly: true do
         allow(Releasetool::Release).to receive(:new).with(v_0_0_3, previous: v_0_0_2).and_return(mock_target)
         allow(mock_target).to receive(:prepare)
         expect { subject.start('v0.0.3') }.to change {
-                                                File.exist?(File.join(tmpdir, '.RELEASE_NEW_VERSION'))
-                                              }
+          File.exist?(File.join(tmpdir, '.RELEASE_NEW_VERSION'))
+        }
         expect(File.read(File.join(tmpdir, '.RELEASE_NEW_VERSION')).to_s).to eq('v0.0.3')
       end
 
@@ -90,6 +90,27 @@ describe Release, quietly: true do
         expect(Releasetool::Release).to receive(:new).with(v_1_0_0, previous: v_0_0_1).and_return(mock_target)
         expect(mock_target).to receive(:prepare)
         subject.start
+      end
+    end
+  end
+
+  describe "commit" do
+    before {
+      expect(subject).to receive(:guarded_system).with("git add release_notes")
+      expect(subject).to receive(:guarded_system).with("git add config/initializers/00-version.rb")
+    }
+    context "with no args" do
+      it "outputs without -e" do
+        expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb  -m\"#{Release::DEFAULT_COMMIT_MESSAGE}\"")
+        subject.commit('v0.0.3')
+      end
+    end
+
+    context "with --edit" do
+      subject { Release.new([], { edit: true }, {}) }
+      it "outputs with e" do
+        expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb -e -m\"#{Release::DEFAULT_COMMIT_MESSAGE}\"")
+        subject.commit('v0.0.3')
       end
     end
   end

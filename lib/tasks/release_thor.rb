@@ -62,11 +62,13 @@ class Release < Thor
       If no version given, it will use the version stored by release start
   END
 
+  # should take release commit --edit which allows you to edit, or --no-edit (default) which allows you to just skip
+  method_option :edit, type: :boolean, desc: "edit", aliases: 'e', default: false
   def commit(version = nil)
     version || stored_version
     guarded_system("git add #{DIR}")
     guarded_system("git add #{VERSION_FILE}") if File.exist?(VERSION_FILE)
-    guarded_system("git commit #{DIR} #{File.exist?(VERSION_FILE) ? VERSION_FILE : ''} -e -m\"#{DEFAULT_COMMIT_MESSAGE}\"")
+    guarded_system("git commit #{DIR} #{File.exist?(VERSION_FILE) ? VERSION_FILE : ''} #{options[:edit] ? '-e' : nil} -m\"#{DEFAULT_COMMIT_MESSAGE}\"")
   end
 
   desc "tag (NEW_VERSION)", <<-END
