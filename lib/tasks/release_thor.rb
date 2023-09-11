@@ -1,10 +1,10 @@
 require 'thor'
+require "releasetool"
 require "releasetool/release"
 require "releasetool/util"
 require "releasetool/version"
 
 class Release < Thor
-
   include Releasetool::Util
   desc "list", <<-END
     show a list of tags ordered by date (just a git listing).
@@ -98,6 +98,13 @@ class Release < Thor
 
   def abort
     remove_stored_version
+  end
+
+  map %w[--version -v] => :__print_version
+
+  desc "--version, -v", "print the version"
+  def __print_version
+    say "Releasetool v#{Releasetool::VERSION}"
   end
 
   protected
