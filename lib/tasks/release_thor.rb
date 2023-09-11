@@ -67,8 +67,8 @@ class Release < Thor
   def commit(version = nil)
     version || stored_version
     guarded_system("git add #{DIR}")
-    guarded_system("git add #{VERSION_FILE}") if File.exist?(VERSION_FILE)
-    guarded_system("git commit #{DIR} #{File.exist?(VERSION_FILE) ? VERSION_FILE : ''} #{options[:edit] ? '-e' : nil} -m\"#{DEFAULT_COMMIT_MESSAGE}\"")
+    guarded_system("git add #{Releasetool::Util.version_file}") if File.exist?(Releasetool::Util.version_file)
+    guarded_system("git commit #{DIR} #{File.exist?(Releasetool::Util.version_file) ? Releasetool::Util.version_file : ''} #{options[:edit] ? '-e' : nil} -m\"#{DEFAULT_COMMIT_MESSAGE}\"")
   end
 
   desc "tag (NEW_VERSION)", <<-END

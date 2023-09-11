@@ -5,9 +5,13 @@ require 'English'
 module Releasetool
   module Util
     DIR = "release_notes"
-    VERSION_FILE = ENV['RELEASETOOL_VERSION_FILE'] || "config/initializers/00-version.rb" # rails out of box
     TEMPLATE_FILE = "__TEMPLATE__.md" # relative to DIR
     RELEASE_MARKER_FILE = ".RELEASE_NEW_VERSION" # should be a config var
+
+    def self.version_file
+      # rails out of box
+      ENV['RELEASETOOL_VERSION_FILE'] || "config/initializers/00-version.rb"
+    end
 
     def stored_version
       fail Thor::Error.new("No stored version... did you forget to do release start?") unless File.exist?(RELEASE_MARKER_FILE)

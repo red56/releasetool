@@ -4,13 +4,13 @@ require 'spec_helper'
 require 'fileutils'
 require File.expand_path('../lib/tasks/release_thor', __dir__)
 
-describe Releasetool do
+RSpec.describe Releasetool do
   it 'should have a version number' do
     expect(Releasetool::VERSION).not_to be_nil
   end
 end
 
-describe Release, quietly: true do
+RSpec.describe Release, quietly: true do
   subject { Release.new }
   let(:tmpdir) { File.expand_path('../tmp/testing', __dir__) }
   let(:root_dir) { File.expand_path('..', __dir__) }
@@ -96,6 +96,7 @@ describe Release, quietly: true do
 
   describe "commit" do
     before {
+      allow(ENV).to receive(:[]).with('RELEASETOOL_VERSION_FILE').and_return(nil) # in case it is defined...
       expect(subject).to receive(:guarded_system).with("git add release_notes")
       expect(subject).to receive(:guarded_system).with("git add config/initializers/00-version.rb")
     }
