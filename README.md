@@ -22,6 +22,8 @@ Or install it yourself as:
 
 ## Usage
 
+```release help```
+
 ### List existing tags
 
 ```release list```
