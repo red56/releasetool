@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'fileutils'
-require File.expand_path('../../lib/tasks/release_thor', __FILE__)
+require File.expand_path('../lib/tasks/release_thor', __dir__)
 
 describe Releasetool do
   it 'should have a version number' do
@@ -10,31 +12,31 @@ end
 
 describe Release, quietly: true do
   subject { Release.new }
-  TMPDIR = File.expand_path('../../tmp/testing', __FILE__)
-  ROOT_DIR = File.expand_path('../..', __FILE__)
+  let(:tmpdir) { File.expand_path('../tmp/testing', __dir__) }
+  let(:root_dir) { File.expand_path('..', __dir__) }
   before {
-    FileUtils.rmtree(TMPDIR)
-    FileUtils.mkdir_p(TMPDIR)
-    FileUtils.chdir(TMPDIR)
+    FileUtils.rmtree(tmpdir)
+    FileUtils.mkdir_p(tmpdir)
+    FileUtils.chdir(tmpdir)
     system('tar -xf ../../spec/fixtures/example_with_releases.tar')
   }
   after {
-    FileUtils.chdir(ROOT_DIR)
+    FileUtils.chdir(root_dir)
   }
   it "should respond to list" do
     subject.list
   end
 
-  let(:mock_target){ instance_double(Releasetool::Release)}
-  let(:v_0_0_1) {Releasetool::Version.new("v0.0.1")}
-  let(:v_0_0_2) {Releasetool::Version.new("v0.0.2")}
-  let(:v_0_0_3) {Releasetool::Version.new("v0.0.3")}
-  let(:v_0_1_0) {Releasetool::Version.new("v0.1.0")}
-  let(:v_1_0_0) {Releasetool::Version.new("v1.0.0")}
+  let(:mock_target) { instance_double(Releasetool::Release) }
+  let(:v_0_0_1) { Releasetool::Version.new("v0.0.1") }
+  let(:v_0_0_2) { Releasetool::Version.new("v0.0.2") }
+  let(:v_0_0_3) { Releasetool::Version.new("v0.0.3") }
+  let(:v_0_1_0) { Releasetool::Version.new("v0.1.0") }
+  let(:v_1_0_0) { Releasetool::Version.new("v1.0.0") }
 
   context "start" do
     context "with a since" do
-      subject { Release.new([], {since: 'v0.0.2'}, {}) }
+      subject { Release.new([], { since: 'v0.0.2' }, {}) }
       it "it should do a prepare and store a file" do
         expect(Releasetool::Release).to receive(:new).with(v_0_0_3, previous: v_0_0_2).and_return(mock_target)
         expect(mock_target).to receive(:prepare)
@@ -44,13 +46,13 @@ describe Release, quietly: true do
         allow(Releasetool::Release).to receive(:new).with(v_0_0_3, previous: v_0_0_2).and_return(mock_target)
         allow(mock_target).to receive(:prepare)
         expect { subject.start('v0.0.3') }.to change {
-              File.exist?(File.join(TMPDIR, '.RELEASE_NEW_VERSION'))
-            }
-        expect(File.read(File.join(TMPDIR, '.RELEASE_NEW_VERSION')).to_s).to eq('v0.0.3')
+                                                File.exist?(File.join(tmpdir, '.RELEASE_NEW_VERSION'))
+                                              }
+        expect(File.read(File.join(tmpdir, '.RELEASE_NEW_VERSION')).to_s).to eq('v0.0.3')
       end
 
       it "with existing release-version file, it should freak out" do
-        FileUtils.touch(File.join(TMPDIR, '.RELEASE_NEW_VERSION'))
+        FileUtils.touch(File.join(tmpdir, '.RELEASE_NEW_VERSION'))
         expect { subject.start('v0.0.3') }.to raise_error
       end
     end
@@ -72,7 +74,7 @@ describe Release, quietly: true do
     end
 
     context "without a new version but with --minor modifier" do
-      subject { Release.new([], {minor: true}, {}) }
+      subject { Release.new([], { minor: true }, {}) }
 
       it "it should use next minor level" do
         expect(Releasetool::Release).to receive(:new).with(v_0_1_0, previous: v_0_0_1).and_return(mock_target)
@@ -82,7 +84,7 @@ describe Release, quietly: true do
     end
 
     context "without a new version but with --major modifier" do
-      subject { Release.new([], {major: true}, {}) }
+      subject { Release.new([], { major: true }, {}) }
 
       it "it should use next minor level" do
         expect(Releasetool::Release).to receive(:new).with(v_1_0_0, previous: v_0_0_1).and_return(mock_target)
@@ -94,7 +96,7 @@ describe Release, quietly: true do
 
   describe "latest" do
     it "outputs latest version" do
-      expect{subject.latest}.to output("v0.0.1\n").to_stdout
+      expect { subject.latest }.to output("v0.0.1\n").to_stdout
     end
   end
 
@@ -109,7 +111,6 @@ describe Release, quietly: true do
       subject.log("--stat", "--reverse")
     end
   end
-
 
   # describe 'CLI' do
   #   it "should work with source and no target" do
@@ -137,5 +138,4 @@ describe Release, quietly: true do
   #         }.strip).not_to eq('')
   #   end
   # end
-
 end

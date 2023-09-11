@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "releasetool/util"
 
 module Releasetool
@@ -6,6 +8,7 @@ module Releasetool
 
     def initialize(version, previous:)
       raise "Version must be a Releasetool::Version" unless version.is_a?(Releasetool::Version)
+
       if previous
         raise "Previous must be nil or a Releasetool::Version" unless version.is_a?(Releasetool::Version)
       end
@@ -18,10 +21,10 @@ module Releasetool
       commits = `git log #{@previous}..HEAD --pretty=format:"- %B"`
       notes = commits.gsub("\n\n", "\n")
       notes_file = "#{DIR}/#{@version}.md"
-      if File.exists?(notes_file)
-        puts "-"*80
+      if File.exist?(notes_file)
+        puts "-" * 80
         puts " File '#{notes_file}' already exists (appending)"
-        puts "-"*80
+        puts "-" * 80
         File.open(notes_file, 'a') do |f|
           f.puts("\n\nAPPENDED:\n\n")
           f.puts(notes)
@@ -33,22 +36,20 @@ module Releasetool
           f.puts(notes)
         end
         puts "written to #{notes_file}"
-        if edit
-          system("open #{notes_file}")
-        end
+        system("open #{notes_file}") if edit
       end
-      if File.exists?(VERSION_FILE)
-        from_version = @previous.to_s_without_v
-        to_version = @version.to_s_without_v
-        guarded_system("cat #{VERSION_FILE} | sed s/#{from_version}/#{to_version.gsub('.', '\.')}/ > #{VERSION_FILE}.tmp")
-        guarded_system("mv #{VERSION_FILE}.tmp #{VERSION_FILE}")
-      end
+      return unless File.exist?(VERSION_FILE)
+
+      from_version = @previous.to_s_without_v
+      to_version = @version.to_s_without_v
+      guarded_system("cat #{VERSION_FILE} | sed s/#{from_version}/#{to_version.gsub('.', '\.')}/ > #{VERSION_FILE}.tmp")
+      guarded_system("mv #{VERSION_FILE}.tmp #{VERSION_FILE}")
     end
 
     private
 
     def ensure_dir
-      Dir.mkdir(DIR) unless File.exists?(DIR)
+      FileUtils.mkdir_p(DIR)
     end
 
     def headers
@@ -62,20 +63,17 @@ module Releasetool
     def ensured_template_file
       ensure_dir
       template_file = "#{DIR}/#{TEMPLATE_FILE}"
-      create_template_file(template_file) unless File.exists?(template_file)
+      create_template_file(template_file) unless File.exist?(template_file)
       template_file
     end
 
     def create_template_file(template_file)
-      File.open(template_file, "w") do |f|
-        f.write <<~FILEEND
+      File.write(template_file, <<~FILEEND)
         $VERSION Release Notes
-        
+
         *Changes since $PREVIOUS*
 
-        FILEEND
-      end
+      FILEEND
     end
-
   end
 end

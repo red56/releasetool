@@ -1,8 +1,12 @@
+# frozen_string_literal: true
+
 module Releasetool
   class Version
     attr_reader :ident
+
     def initialize(ident)
       raise "Not a valid version identifier: #{ident.inspect}" unless ident.is_a?(String)
+
       @ident = ident
     end
 
@@ -43,9 +47,11 @@ module Releasetool
     end
 
     private
-    def incremented(v)
-      raise "Can't work out next version from #{self}" unless v.to_i.to_s == v
-      v.to_i + 1
+
+    def incremented(number)
+      raise "Can't work out next version from #{self}" unless number.to_i.to_s == number
+
+      number.to_i + 1
     end
 
     def segments
