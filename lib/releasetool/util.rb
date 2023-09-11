@@ -1,13 +1,15 @@
+# frozen_string_literal: true
+
 module Releasetool
   module Util
-
     DIR = "release_notes"
-    VERSION_FILE = ENV['RELEASETOOL_VERSION_FILE'] || "config/initializers/00-version.rb" #rails out of box
+    VERSION_FILE = ENV['RELEASETOOL_VERSION_FILE'] || "config/initializers/00-version.rb" # rails out of box
     TEMPLATE_FILE = "__TEMPLATE__.md" # relative to DIR
     RELEASE_MARKER_FILE = ".RELEASE_NEW_VERSION" # should be a config var
 
     def stored_version
       fail Thor::Error.new("No stored version... did you forget to do release start?") unless File.exist?(RELEASE_MARKER_FILE)
+
       File.read(RELEASE_MARKER_FILE).strip
     end
 
