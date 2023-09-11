@@ -38,12 +38,12 @@ module Releasetool
         puts "written to #{notes_file}"
         system("open #{notes_file}") if edit
       end
-      return unless File.exist?(VERSION_FILE)
+      return unless File.exist?(Releasetool::Util.version_file)
 
       from_version = @previous.to_s_without_v
       to_version = @version.to_s_without_v
-      guarded_system("cat #{VERSION_FILE} | sed s/#{from_version}/#{to_version.gsub('.', '\.')}/ > #{VERSION_FILE}.tmp")
-      guarded_system("mv #{VERSION_FILE}.tmp #{VERSION_FILE}")
+      guarded_system("cat #{Releasetool::Util.version_file} | sed s/#{from_version}/#{to_version.gsub('.', '\.')}/ > #{Releasetool::Util.version_file}.tmp")
+      guarded_system("mv #{Releasetool::Util.version_file}.tmp #{Releasetool::Util.version_file}")
     end
 
     private

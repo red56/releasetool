@@ -1,11 +1,17 @@
 # frozen_string_literal: true
 
+require 'English'
+
 module Releasetool
   module Util
     DIR = "release_notes"
-    VERSION_FILE = ENV['RELEASETOOL_VERSION_FILE'] || "config/initializers/00-version.rb" # rails out of box
     TEMPLATE_FILE = "__TEMPLATE__.md" # relative to DIR
     RELEASE_MARKER_FILE = ".RELEASE_NEW_VERSION" # should be a config var
+
+    def self.version_file
+      # rails out of box
+      ENV['RELEASETOOL_VERSION_FILE'] || "config/initializers/00-version.rb"
+    end
 
     def stored_version
       fail Thor::Error.new("No stored version... did you forget to do release start?") unless File.exist?(RELEASE_MARKER_FILE)
@@ -20,6 +26,14 @@ module Releasetool
     def guarded_system(command)
       puts command
       system(command) or raise Thor::Error.new("Couldn't '#{command}'")
+    end
+
+    def guarded_capture(command)
+      puts command
+      output = `#{command}`
+      raise Thor::Error.new("Couldn't '#{command}'") unless $CHILD_STATUS
+
+      output
     end
   end
 end
