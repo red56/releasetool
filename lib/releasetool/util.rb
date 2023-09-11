@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'English'
+
 module Releasetool
   module Util
     DIR = "release_notes"
@@ -20,6 +22,14 @@ module Releasetool
     def guarded_system(command)
       puts command
       system(command) or raise Thor::Error.new("Couldn't '#{command}'")
+    end
+
+    def guarded_capture(command)
+      puts command
+      output = `#{command}`
+      raise Thor::Error.new("Couldn't '#{command}'") unless $CHILD_STATUS
+
+      output
     end
   end
 end

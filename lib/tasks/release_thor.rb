@@ -78,7 +78,8 @@ class Release < Thor
 
   def tag(version = nil)
     version ||= stored_version
-    guarded_system("git tag -a #{version}")
+    last_useful_commit = guarded_capture("git log head^^..head^  --pretty=format:%s").strip.split("\n").first.strip
+    guarded_system("git tag -a #{version} -e -m \"#{last_useful_commit}\"")
   end
 
   desc "push (NEW_VERSION)", <<-END
