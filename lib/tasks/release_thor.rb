@@ -8,6 +8,16 @@ require "releasetool/version"
 
 class Release < Thor
   include Releasetool::Util
+  desc "init", <<-END
+    generate optional config directory and optional hooks file
+  END
+
+  def init
+    config.generate
+  end
+
+  # ========================
+
   desc "list", <<-END
     show a list of tags ordered by date (just a git listing).
   END
@@ -51,9 +61,10 @@ class Release < Thor
   def start(specified_version = nil)
     raise Thor::Error.new("Can't start when already started on a version. release abort or release finish") if File.exist?(RELEASE_MARKER_FILE)
 
-    version = next_version(specified_version)
+    version = specified_version ? Releasetool::Version.new(specified_version) : next_version
     File.write(RELEASE_MARKER_FILE, version)
     Releasetool::Release.new(version, previous: previous_version).prepare(edit: options[:edit])
+    config.after_start_hook(version)
   end
 
   DEFAULT_COMMIT_MESSAGE = 'preparing for release [CI SKIP]'
@@ -65,10 +76,11 @@ class Release < Thor
   # should take release commit --edit which allows you to edit, or --no-edit (default) which allows you to just skip
   method_option :edit, type: :boolean, desc: "edit", aliases: 'e', default: false
   def commit(version = nil)
-    version || stored_version
+    version ||= stored_version
     guarded_system("git add #{DIR}")
     guarded_system("git add #{Releasetool::Util.version_file}") if File.exist?(Releasetool::Util.version_file)
     guarded_system("git commit #{DIR} #{File.exist?(Releasetool::Util.version_file) ? Releasetool::Util.version_file : ''} #{options[:edit] ? '-e' : nil} -m\"#{DEFAULT_COMMIT_MESSAGE}\"")
+    config.after_commit_hook(version)
   end
 
   desc "tag (NEW_VERSION)", <<-END
@@ -111,9 +123,7 @@ class Release < Thor
 
   protected
 
-  def next_version(specified)
-    return Releasetool::Version.new(specified) if specified
-
+  def next_version
     if options[:major]
       previous_version.next_major
     elsif options[:minor]

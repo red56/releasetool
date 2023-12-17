@@ -69,6 +69,7 @@ It will ask for a one-line summary of the release (full details are in the relea
 
 The tests work on a known-good repo stored in `spec/fixtures/example_with_releases.tar`. To recreate this:
 ```
+mkdir -p spec/fixtures/example_with_releases
 cd spec/fixtures/example_with_releases && tar -xvf ../example_with_releases.tar  && cd -
 ```
 
@@ -77,11 +78,20 @@ then you can tweak it and save it back with:
 cd spec/fixtures/example_with_releases && tar -cvf ../example_with_releases.tar . && cd -
 ```
 
+ditto for other one with config
+
+cd spec/fixtures/example_with_releases && tar -cvf ../example_with_releases.tar . && cd -
+
 ## Configuration
 
 If you want it to automatically update the version number in a string then set the environment variable
  `RELEASETOOL_VERSION_FILE`, eg. `export RELEASETOOL_VERSION_FILE=./lib/releasetool.rb`. By default this is configured to config/initializers/00-version.rb (useful for rails projects).
 
+If you want to run something after `release start` or after `release commit` then generate a hooks file:
+
+    release init
+
+which will generate a file at `config/releasetool/hooks.rb` which you can adjust.
 
 ## Contributing
 
