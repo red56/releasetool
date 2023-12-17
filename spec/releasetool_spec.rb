@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 require 'fileutils'
+require 'pathname'
 require File.expand_path('../lib/tasks/release_thor', __dir__)
 
 RSpec.describe Releasetool do
@@ -10,11 +11,15 @@ RSpec.describe Releasetool do
   end
 end
 
-RSpec.describe Release, quietly: true do
+RSpec.describe Release, quietly: false do
   subject { Release.new }
+
   let(:tmpdir) { File.expand_path('../tmp/testing', __dir__) }
   let(:root_dir) { File.expand_path('..', __dir__) }
+  let(:hooks_example_rb) { File.expand_path('./fixtures/hooks_example.rb', __dir__) }
+  let(:empty_file) { File.expand_path('./fixtures/empty_file.rb', __dir__) }
   before {
+    Releasetool.send(:remove_const, :Hooks) if defined?(Releasetool::Hooks)
     FileUtils.rmtree(tmpdir)
     FileUtils.mkdir_p(tmpdir)
     FileUtils.chdir(tmpdir)
@@ -53,7 +58,7 @@ RSpec.describe Release, quietly: true do
 
       it "with existing release-version file, it should freak out" do
         FileUtils.touch(File.join(tmpdir, '.RELEASE_NEW_VERSION'))
-        expect { subject.start('v0.0.3') }.to raise_error
+        expect { subject.start('v0.0.3') }.to raise_error(/Can't start when already started on a version/)
       end
     end
 
@@ -92,6 +97,31 @@ RSpec.describe Release, quietly: true do
         subject.start
       end
     end
+
+    context "with config and..." do
+      context "with empty hooks" do
+        before do
+          FileUtils.mkdir_p("#{tmpdir}/config/releasetool")
+          FileUtils.cp(empty_file, "#{tmpdir}/config/releasetool/hooks.rb")
+        end
+        it "should still work" do
+          expect(Releasetool::Release).to receive(:new).with(v_0_0_2, previous: v_0_0_1).and_return(mock_target)
+          expect(mock_target).to receive(:prepare)
+          expected = "after_start(v0.0.2) has been called"
+          expect { subject.start }.not_to output(/#{Regexp.escape(expected)}/).to_stdout
+        end
+      end
+      context "with hook" do
+        before do
+          FileUtils.mkdir_p("#{tmpdir}/config/releasetool")
+          FileUtils.cp(hooks_example_rb, "#{tmpdir}/config/releasetool/hooks.rb")
+        end
+        it "should output hook" do
+          expected = "after_start(v0.0.2) has been called"
+          expect { subject.start }.to output(/#{Regexp.escape(expected)}/).to_stdout
+        end
+      end
+    end
   end
 
   describe "commit" do
@@ -113,6 +143,37 @@ RSpec.describe Release, quietly: true do
         expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb -e -m\"#{Release::DEFAULT_COMMIT_MESSAGE}\"")
         subject.commit('v0.0.3')
       end
+    end
+
+    context "with generated config and hook" do
+      it "should generate and still work" do
+        subject.init
+        expected = "after_commit(v0.0.3) has been called"
+        expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb  -m\"#{Release::DEFAULT_COMMIT_MESSAGE}\"")
+        expect { subject.commit('v0.0.3') }.not_to output(/#{Regexp.escape(expected)}/).to_stdout
+      end
+    end
+
+    context "with config and hook" do
+      before do
+        FileUtils.mkdir_p("#{tmpdir}/config/releasetool")
+        FileUtils.cp(hooks_example_rb, "#{tmpdir}/config/releasetool/hooks.rb")
+      end
+      it "should output hook" do
+        expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb  -m\"#{Release::DEFAULT_COMMIT_MESSAGE}\"")
+        expected = "after_commit(v0.0.3) has been called"
+        expect { subject.commit('v0.0.3') }.to output(/#{Regexp.escape(expected)}/).to_stdout
+      end
+    end
+  end
+
+  describe "init" do
+    it "should generate " do
+      expect(Dir.exist?("#{tmpdir}/config/releasetool")).to be_falsey
+      expect(File.exist?("#{tmpdir}/config/releasetool/hooks.rb")).to be_falsey
+      subject.init
+      expect(Dir.exist?("#{tmpdir}/config/releasetool")).to be_truthy
+      expect(File.exist?("#{tmpdir}/config/releasetool/hooks.rb")).to be_truthy
     end
   end
 

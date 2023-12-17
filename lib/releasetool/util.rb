@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'English'
+require "releasetool/configuration"
 
 module Releasetool
   module Util
@@ -34,6 +35,11 @@ module Releasetool
       raise Thor::Error.new("Couldn't '#{command}'") unless $CHILD_STATUS
 
       output
+    end
+
+    # @return [Releasetool::Configuration]
+    def config
+      @config ||= Releasetool::Configuration.new
     end
   end
 end
