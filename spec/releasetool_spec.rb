@@ -2,7 +2,6 @@
 
 require 'spec_helper'
 require 'fileutils'
-require 'pathname'
 require File.expand_path('../lib/tasks/release_thor', __dir__)
 
 RSpec.describe Releasetool do
