@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 require 'fileutils'
+require 'climate_control'
 require File.expand_path('../lib/tasks/release_thor', __dir__)
 
 RSpec.describe Releasetool do
@@ -10,7 +11,13 @@ RSpec.describe Releasetool do
   end
 end
 
-RSpec.describe Release, quietly: false do
+RSpec.describe Release, quietly: true do
+  around do |example|
+    ClimateControl.modify(RELEASETOOL_VERSION_FILE: nil) do # in case it is defined...
+      example.run
+    end
+  end
+
   subject { Release.new }
 
   let(:tmpdir) { File.expand_path('../tmp/testing', __dir__) }
@@ -124,22 +131,29 @@ RSpec.describe Release, quietly: false do
   end
 
   describe "commit" do
-    before {
-      allow(ENV).to receive(:[]).with('RELEASETOOL_VERSION_FILE').and_return(nil) # in case it is defined...
+    let(:options) { { after: "default" } }
+    subject { Release.new([], options, {}) }
+
+    let!(:commit_expectations) {
       expect(subject).to receive(:guarded_system).with("git add release_notes")
       expect(subject).to receive(:guarded_system).with("git add config/initializers/00-version.rb")
+      expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb  -m\"#{Release::DEFAULT_COMMIT_MESSAGE}\"")
     }
     context "with no args" do
       it "outputs without -e" do
-        expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb  -m\"#{Release::DEFAULT_COMMIT_MESSAGE}\"")
         subject.commit('v0.0.3')
       end
     end
 
     context "with --edit" do
+      let(:options) { { after: "default", edit: true } }
       subject { Release.new([], { edit: true }, {}) }
-      it "outputs with e" do
+      let!(:commit_expectations) {
+        expect(subject).to receive(:guarded_system).with("git add release_notes")
+        expect(subject).to receive(:guarded_system).with("git add config/initializers/00-version.rb")
         expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb -e -m\"#{Release::DEFAULT_COMMIT_MESSAGE}\"")
+      }
+      it "outputs with e" do
         subject.commit('v0.0.3')
       end
     end
@@ -148,7 +162,6 @@ RSpec.describe Release, quietly: false do
       it "should generate and still work" do
         subject.init
         expected = "after_commit(v0.0.3) has been called"
-        expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb  -m\"#{Release::DEFAULT_COMMIT_MESSAGE}\"")
         expect { subject.commit('v0.0.3') }.not_to output(/#{Regexp.escape(expected)}/).to_stdout
       end
     end
@@ -159,9 +172,25 @@ RSpec.describe Release, quietly: false do
         FileUtils.cp(hooks_example_rb, "#{tmpdir}/config/releasetool/hooks.rb")
       end
       it "should output hook" do
-        expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb  -m\"#{Release::DEFAULT_COMMIT_MESSAGE}\"")
         expected = "after_commit(v0.0.3) has been called"
         expect { subject.commit('v0.0.3') }.to output(/#{Regexp.escape(expected)}/).to_stdout
+      end
+      context "with --after" do
+        let(:options) { { after: true } }
+        let!(:commit_expectations) {
+          # none!
+        }
+        it "should output hook only" do
+          expected = "after_commit(v0.0.3) has been called"
+          expect { subject.commit('v0.0.3') }.to output(/#{Regexp.escape(expected)}/).to_stdout
+        end
+      end
+      context "with --no-after" do
+        let(:options) { { after: false } }
+        it "shouldn't output hook" do
+          expected = "after_commit(v0.0.3) has been called"
+          expect { subject.commit('v0.0.3') }.not_to output(/#{Regexp.escape(expected)}/).to_stdout
+        end
       end
     end
   end
