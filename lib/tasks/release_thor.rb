@@ -82,7 +82,7 @@ class Release < Thor
       guarded_system("git add #{Releasetool::Util.version_file}") if File.exist?(Releasetool::Util.version_file)
       guarded_system("git commit #{DIR} #{File.exist?(Releasetool::Util.version_file) ? Releasetool::Util.version_file : ''} #{options[:edit] ? '-e' : nil} -m\"#{DEFAULT_COMMIT_MESSAGE}\"")
     end
-    config.after_commit_hook(version) unless options[:after]
+    config.after_commit_hook(version) if options[:after]
   end
 
   desc "tag (NEW_VERSION)", <<-END
