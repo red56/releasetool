@@ -73,14 +73,16 @@ class Release < Thor
       If no version given, it will use the version stored by release start
   END
 
-  # should take release commit --edit which allows you to edit, or --no-edit (default) which allows you to just skip
-  method_option :edit, type: :boolean, desc: "edit", aliases: 'e', default: false
+  method_option :edit, type: :boolean, desc: "release commit --edit allows you to edit, or --no-edit (default) which allows you to just skip", aliases: 'e', default: false
+  method_option :after, type: :boolean, desc: " --after (only do after -- needed for when after fails first time);  --no-after (only do the standard); default is do both", default: "default", check_default_type: false
   def commit(version = nil)
     version ||= stored_version
-    guarded_system("git add #{DIR}")
-    guarded_system("git add #{Releasetool::Util.version_file}") if File.exist?(Releasetool::Util.version_file)
-    guarded_system("git commit #{DIR} #{File.exist?(Releasetool::Util.version_file) ? Releasetool::Util.version_file : ''} #{options[:edit] ? '-e' : nil} -m\"#{DEFAULT_COMMIT_MESSAGE}\"")
-    config.after_commit_hook(version)
+    if options[:after] == "default" || !options[:after]
+      guarded_system("git add #{DIR}")
+      guarded_system("git add #{Releasetool::Util.version_file}") if File.exist?(Releasetool::Util.version_file)
+      guarded_system("git commit #{DIR} #{File.exist?(Releasetool::Util.version_file) ? Releasetool::Util.version_file : ''} #{options[:edit] ? '-e' : nil} -m\"#{DEFAULT_COMMIT_MESSAGE}\"")
+    end
+    config.after_commit_hook(version) unless options[:after]
   end
 
   desc "tag (NEW_VERSION)", <<-END
