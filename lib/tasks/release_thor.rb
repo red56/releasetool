@@ -5,6 +5,7 @@ require "releasetool"
 require "releasetool/release"
 require "releasetool/util"
 require "releasetool/version"
+require "shellwords"
 
 class Release < Thor
   include Releasetool::Util
