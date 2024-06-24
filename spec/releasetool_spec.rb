@@ -223,6 +223,19 @@ RSpec.describe Release, quietly: true do
     end
   end
 
+  describe "tag" do
+    let(:last_message) { "some message"}
+    it "calls out" do
+      allow(subject).to receive(:guarded_capture).with("git log head^^..head^  --pretty=format:%s").and_return "some-message"
+      expect(subject).to receive(:guarded_system).with("git tag -a v1.2.3 -e -m some-message")
+      expect(subject.tag("v1.2.3"))
+    end
+    it "escapes" do
+      allow(subject).to receive(:guarded_capture).with("git log head^^..head^  --pretty=format:%s").and_return 'Something new in sandwiches "aha" (#123)'
+      expect(subject).to receive(:guarded_system).with('git tag -a v1.2.3 -e -m Something\ new\ in\ sandwiches\ \"aha\"\ \(#123\)')
+      expect(subject.tag("v1.2.3"))
+    end
+  end
   # describe 'CLI' do
   #   it "should work with source and no target" do
   #     puts "CLI"
