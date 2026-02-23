@@ -82,7 +82,11 @@ class Release < Thor
     if options[:after] == "default" || !options[:after]
       guarded_system("git add #{DIR}")
       guarded_system("git add #{Releasetool::Util.version_file}") if File.exist?(Releasetool::Util.version_file)
-      guarded_system("git commit #{DIR} #{Releasetool::Util.version_file if File.exist?(Releasetool::Util.version_file)} #{'-e' if options[:edit]} -m\"#{DEFAULT_COMMIT_MESSAGE}\"")
+      args = ["git", "commit", DIR]
+      args << Releasetool::Util.version_file if File.exist?(Releasetool::Util.version_file)
+      args << "-e" if options[:edit]
+      args << "-m" << DEFAULT_COMMIT_MESSAGE
+      guarded_system(Shellwords.join(args))
     end
     config.after_commit_hook(version) if options[:after]
   end

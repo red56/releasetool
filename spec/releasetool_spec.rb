@@ -132,12 +132,13 @@ RSpec.describe Release, quietly: true do
 
   describe "commit" do
     let(:options) { { after: "default" } }
+    let(:default_commit_message_escaped) { 'preparing\ for\ release\ \[CI\ SKIP\]' }
     subject { Release.new([], options, {}) }
 
     let!(:commit_expectations) {
       expect(subject).to receive(:guarded_system).with("git add release_notes")
       expect(subject).to receive(:guarded_system).with("git add config/initializers/00-version.rb")
-      expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb  -m\"#{Release::DEFAULT_COMMIT_MESSAGE}\"")
+      expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb -m #{default_commit_message_escaped}")
     }
     context "with no args" do
       it "outputs without -e" do
@@ -151,7 +152,7 @@ RSpec.describe Release, quietly: true do
       let!(:commit_expectations) {
         expect(subject).to receive(:guarded_system).with("git add release_notes")
         expect(subject).to receive(:guarded_system).with("git add config/initializers/00-version.rb")
-        expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb -e -m\"#{Release::DEFAULT_COMMIT_MESSAGE}\"")
+        expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb -e -m #{default_commit_message_escaped}")
       }
       it "outputs with e" do
         subject.commit("v0.0.3")
