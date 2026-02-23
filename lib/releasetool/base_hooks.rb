@@ -8,13 +8,5 @@ module Releasetool
     def initialize(config)
       @config = config
     end
-
-    def after_prepare(version)
-      # noop
-    end
-
-    def after_commit(version)
-      # noop
-    end
   end
 end

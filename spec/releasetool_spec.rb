@@ -123,8 +123,12 @@ RSpec.describe Release, quietly: true do
           FileUtils.cp(hooks_example_rb, "#{tmpdir}/config/releasetool/hooks.rb")
         end
         it "should output hook" do
-          expected = "after_start(v0.0.2) has been called"
-          expect { subject.start }.to output(/#{Regexp.escape(expected)}/).to_stdout
+          outputs = [
+            "before_start(v0.0.2) has been called",
+            "after_start(v0.0.2) has been called"
+          ]
+          expected_output = /#{outputs.map { |output| Regexp.escape(output) }.join('.*')}/m
+          expect { subject.start }.to output(expected_output).to_stdout
         end
       end
     end
@@ -173,8 +177,12 @@ RSpec.describe Release, quietly: true do
         FileUtils.cp(hooks_example_rb, "#{tmpdir}/config/releasetool/hooks.rb")
       end
       it "should output hook" do
-        expected = "after_commit(v0.0.3) has been called"
-        expect { subject.commit("v0.0.3") }.to output(/#{Regexp.escape(expected)}/).to_stdout
+        outputs = [
+          "before_commit(v0.0.3) has been called",
+          "after_commit(v0.0.3) has been called"
+        ]
+        expected_output = /#{outputs.map { |output| Regexp.escape(output) }.join('.*')}/m
+        expect { subject.commit("v0.0.3") }.to output(expected_output).to_stdout
       end
       context "with --after" do
         let(:options) { { after: true } }

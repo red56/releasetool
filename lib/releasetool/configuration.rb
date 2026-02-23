@@ -5,16 +5,23 @@ require "pathname"
 
 module Releasetool
   class Configuration
-    def after_start_hook(version)
-      return nil unless hooks.respond_to?(:after_start)
+    BEFORE_AFTER = %i[before after].freeze
+    EVENTS = %i[start commit].freeze
 
-      hooks.after_start(version)
+    def around_hooks(event, version)
+      run_hook_for(:before, event, version)
+      yield
+      run_hook_for(:after, event, version)
     end
 
-    def after_commit_hook(version)
-      return nil unless hooks.respond_to?(:after_commit)
+    def run_hook_for(before_after, event, version)
+      raise "before_after must be in #{BEFORE_AFTER.inspect}" unless BEFORE_AFTER.include?(before_after)
+      raise "event must be in #{EVENTS.inspect}" unless EVENTS.include?(event)
 
-      hooks.after_commit(version)
+      hook = :"#{before_after}_#{event}"
+      return nil unless hooks.respond_to?(hook)
+
+      hooks.public_send(hook, version)
     end
 
     def generate
@@ -61,8 +68,16 @@ module Releasetool
           class Hooks < Releasetool::BaseHooks
             include Releasetool::Util
 
+            # def before_start(version)
+            #   puts "before_start has been called"
+            # end
+
             # def after_start(version)
             #   puts "after_start has been called"
+            # end
+
+            # def before_commit(version)
+            #   puts "before_commit has been called"
             # end
 
             # def after_commit(version)
