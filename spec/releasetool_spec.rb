@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-require 'fileutils'
-require 'climate_control'
-require File.expand_path('../lib/tasks/release_thor', __dir__)
+require "spec_helper"
+require "fileutils"
+require "climate_control"
+require File.expand_path("../lib/tasks/release_thor", __dir__)
 
 RSpec.describe Releasetool do
-  it 'should have a version number' do
+  it "should have a version number" do
     expect(Releasetool::VERSION).not_to be_nil
   end
 end
@@ -20,16 +20,16 @@ RSpec.describe Release, quietly: true do
 
   subject { Release.new }
 
-  let(:tmpdir) { File.expand_path('../tmp/testing', __dir__) }
-  let(:root_dir) { File.expand_path('..', __dir__) }
-  let(:hooks_example_rb) { File.expand_path('./fixtures/hooks_example.rb', __dir__) }
-  let(:empty_file) { File.expand_path('./fixtures/empty_file.rb', __dir__) }
+  let(:tmpdir) { File.expand_path("../tmp/testing", __dir__) }
+  let(:root_dir) { File.expand_path("..", __dir__) }
+  let(:hooks_example_rb) { File.expand_path("./fixtures/hooks_example.rb", __dir__) }
+  let(:empty_file) { File.expand_path("./fixtures/empty_file.rb", __dir__) }
   before {
     Releasetool.send(:remove_const, :Hooks) if defined?(Releasetool::Hooks)
     FileUtils.rmtree(tmpdir)
     FileUtils.mkdir_p(tmpdir)
     FileUtils.chdir(tmpdir)
-    system('tar -xf ../../spec/fixtures/example_with_releases.tar')
+    system("tar -xf ../../spec/fixtures/example_with_releases.tar")
   }
   after {
     FileUtils.chdir(root_dir)
@@ -47,24 +47,24 @@ RSpec.describe Release, quietly: true do
 
   describe "start" do
     context "with a since" do
-      subject { Release.new([], { since: 'v0.0.2' }, {}) }
+      subject { Release.new([], { since: "v0.0.2" }, {}) }
       it "it should do a prepare and store a file" do
         expect(Releasetool::Release).to receive(:new).with(v_0_0_3, previous: v_0_0_2).and_return(mock_target)
         expect(mock_target).to receive(:prepare)
-        subject.start('v0.0.3')
+        subject.start("v0.0.3")
       end
       it "stores a release-version file" do
         allow(Releasetool::Release).to receive(:new).with(v_0_0_3, previous: v_0_0_2).and_return(mock_target)
         allow(mock_target).to receive(:prepare)
-        expect { subject.start('v0.0.3') }.to change {
-          File.exist?(File.join(tmpdir, '.RELEASE_NEW_VERSION'))
+        expect { subject.start("v0.0.3") }.to change {
+          File.exist?(File.join(tmpdir, ".RELEASE_NEW_VERSION"))
         }
-        expect(File.read(File.join(tmpdir, '.RELEASE_NEW_VERSION')).to_s).to eq('v0.0.3')
+        expect(File.read(File.join(tmpdir, ".RELEASE_NEW_VERSION")).to_s).to eq("v0.0.3")
       end
 
       it "with existing release-version file, it should freak out" do
-        FileUtils.touch(File.join(tmpdir, '.RELEASE_NEW_VERSION'))
-        expect { subject.start('v0.0.3') }.to raise_error(/Can't start when already started on a version/)
+        FileUtils.touch(File.join(tmpdir, ".RELEASE_NEW_VERSION"))
+        expect { subject.start("v0.0.3") }.to raise_error(/Can't start when already started on a version/)
       end
     end
 
@@ -72,7 +72,7 @@ RSpec.describe Release, quietly: true do
       it "it should use latest tag" do
         expect(Releasetool::Release).to receive(:new).with(v_0_0_3, previous: v_0_0_1).and_return(mock_target)
         expect(mock_target).to receive(:prepare)
-        subject.start('v0.0.3')
+        subject.start("v0.0.3")
       end
     end
 
@@ -132,16 +132,17 @@ RSpec.describe Release, quietly: true do
 
   describe "commit" do
     let(:options) { { after: "default" } }
+    let(:default_commit_message_escaped) { 'preparing\ for\ release\ \[CI\ SKIP\]' }
     subject { Release.new([], options, {}) }
 
     let!(:commit_expectations) {
       expect(subject).to receive(:guarded_system).with("git add release_notes")
       expect(subject).to receive(:guarded_system).with("git add config/initializers/00-version.rb")
-      expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb  -m\"#{Release::DEFAULT_COMMIT_MESSAGE}\"")
+      expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb -m #{default_commit_message_escaped}")
     }
     context "with no args" do
       it "outputs without -e" do
-        subject.commit('v0.0.3')
+        subject.commit("v0.0.3")
       end
     end
 
@@ -151,10 +152,10 @@ RSpec.describe Release, quietly: true do
       let!(:commit_expectations) {
         expect(subject).to receive(:guarded_system).with("git add release_notes")
         expect(subject).to receive(:guarded_system).with("git add config/initializers/00-version.rb")
-        expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb -e -m\"#{Release::DEFAULT_COMMIT_MESSAGE}\"")
+        expect(subject).to receive(:guarded_system).with("git commit release_notes config/initializers/00-version.rb -e -m #{default_commit_message_escaped}")
       }
       it "outputs with e" do
-        subject.commit('v0.0.3')
+        subject.commit("v0.0.3")
       end
     end
 
@@ -162,7 +163,7 @@ RSpec.describe Release, quietly: true do
       it "should generate and still work" do
         subject.init
         expected = "after_commit(v0.0.3) has been called"
-        expect { subject.commit('v0.0.3') }.not_to output(/#{Regexp.escape(expected)}/).to_stdout
+        expect { subject.commit("v0.0.3") }.not_to output(/#{Regexp.escape(expected)}/).to_stdout
       end
     end
 
@@ -173,7 +174,7 @@ RSpec.describe Release, quietly: true do
       end
       it "should output hook" do
         expected = "after_commit(v0.0.3) has been called"
-        expect { subject.commit('v0.0.3') }.to output(/#{Regexp.escape(expected)}/).to_stdout
+        expect { subject.commit("v0.0.3") }.to output(/#{Regexp.escape(expected)}/).to_stdout
       end
       context "with --after" do
         let(:options) { { after: true } }
@@ -182,14 +183,14 @@ RSpec.describe Release, quietly: true do
         }
         it "should output hook only" do
           expected = "after_commit(v0.0.3) has been called"
-          expect { subject.commit('v0.0.3') }.to output(/#{Regexp.escape(expected)}/).to_stdout
+          expect { subject.commit("v0.0.3") }.to output(/#{Regexp.escape(expected)}/).to_stdout
         end
       end
       context "with --no-after" do
         let(:options) { { after: false } }
         it "shouldn't output hook" do
           expected = "after_commit(v0.0.3) has been called"
-          expect { subject.commit('v0.0.3') }.not_to output(/#{Regexp.escape(expected)}/).to_stdout
+          expect { subject.commit("v0.0.3") }.not_to output(/#{Regexp.escape(expected)}/).to_stdout
         end
       end
     end
