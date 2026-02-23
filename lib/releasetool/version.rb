@@ -32,7 +32,7 @@ module Releasetool
 
     def to_s_without_v
       if @ident[0] == "v"
-        @ident[1..-1]
+        @ident[1..]
       else
         @ident
       end

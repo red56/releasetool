@@ -10,9 +10,8 @@ module Releasetool
     def initialize(version, previous:)
       raise "Version must be a Releasetool::Version" unless version.is_a?(Releasetool::Version)
 
-      if previous
-        raise "Previous must be nil or a Releasetool::Version" unless version.is_a?(Releasetool::Version)
-      end
+      raise "Previous must be nil or a Releasetool::Version" if previous && !version.is_a?(Releasetool::Version)
+
       @version = version
       @previous = previous
     end
@@ -26,13 +25,13 @@ module Releasetool
         puts "-" * 80
         puts " File '#{notes_file}' already exists (appending)"
         puts "-" * 80
-        File.open(notes_file, 'a') do |f|
+        File.open(notes_file, "a") do |f|
           f.puts("\n\nAPPENDED:\n\n")
           f.puts(notes)
         end
       else
         ensure_dir
-        File.open(notes_file, 'w') do |f|
+        File.open(notes_file, "w") do |f|
           f.puts(headers)
           f.puts(notes)
         end

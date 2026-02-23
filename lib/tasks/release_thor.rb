@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'thor'
+require "thor"
 require "releasetool"
 require "releasetool/release"
 require "releasetool/util"
@@ -45,15 +45,15 @@ class Release < Thor
   END
 
   def log(*args)
-    extra = " #{args.join(" ")}" if args.length > 0
+    extra = " #{args.join(' ')}" if args.length.positive?
     guarded_system("git log #{previous_version}..#{extra}")
   end
 
   # ========================
 
   method_option :since, type: :string, desc: "since commit_ref (or will use most recent tag)", required: false,
-                        aliases: 's'
-  method_option :edit, type: :boolean, desc: "edit", required: false, aliases: 'e'
+                        aliases: "s"
+  method_option :edit, type: :boolean, desc: "edit", required: false, aliases: "e"
   method_option :minor, type: :boolean, desc: "minor version", required: false, default: false
 
   desc "start (NEW_VERSION)", <<-END
@@ -61,7 +61,7 @@ class Release < Thor
   END
 
   def start(specified_version = nil)
-    raise Thor::Error.new("Can't start when already started on a version. release abort or release finish") if File.exist?(RELEASE_MARKER_FILE)
+    raise Thor::Error, "Can't start when already started on a version. release abort or release finish" if File.exist?(RELEASE_MARKER_FILE)
 
     version = specified_version ? Releasetool::Version.new(specified_version) : next_version
     File.write(RELEASE_MARKER_FILE, version)
@@ -69,13 +69,13 @@ class Release < Thor
     config.after_start_hook(version)
   end
 
-  DEFAULT_COMMIT_MESSAGE = 'preparing for release [CI SKIP]'
+  DEFAULT_COMMIT_MESSAGE = "preparing for release [CI SKIP]"
   desc "commit (NEW_VERSION)", <<-END
       Commit release and version identifier to git with message '#{DEFAULT_COMMIT_MESSAGE}'.
       If no version given, it will use the version stored by release start
   END
 
-  method_option :edit, type: :boolean, desc: "release commit --edit allows you to edit, or --no-edit (default) which allows you to just skip", aliases: 'e', default: false
+  method_option :edit, type: :boolean, desc: "release commit --edit allows you to edit, or --no-edit (default) which allows you to just skip", aliases: "e", default: false
   method_option :after, type: :boolean, desc: " --after (only do after -- needed for when after fails first time);  --no-after (only do the standard); default is do both", default: "default", check_default_type: false
   def commit(version = nil)
     version ||= stored_version
