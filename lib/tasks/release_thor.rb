@@ -64,9 +64,10 @@ class Release < Thor
     raise Thor::Error, "Can't start when already started on a version. release abort or release finish" if File.exist?(RELEASE_MARKER_FILE)
 
     version = specified_version ? Releasetool::Version.new(specified_version) : next_version
-    File.write(RELEASE_MARKER_FILE, version)
-    Releasetool::Release.new(version, previous: previous_version).prepare(edit: options[:edit])
-    config.after_start_hook(version)
+    config.around_hooks(:start, version) do
+      File.write(RELEASE_MARKER_FILE, version)
+      Releasetool::Release.new(version, previous: previous_version).prepare(edit: options[:edit])
+    end
   end
 
   DEFAULT_COMMIT_MESSAGE = "preparing for release [CI SKIP]"
@@ -77,9 +78,11 @@ class Release < Thor
 
   method_option :edit, type: :boolean, desc: "release commit --edit allows you to edit, or --no-edit (default) which allows you to just skip", aliases: "e", default: false
   method_option :after, type: :boolean, desc: " --after (only do after -- needed for when after fails first time);  --no-after (only do the standard); default is do both", default: "default", check_default_type: false
+
   def commit(version = nil)
     version ||= stored_version
     if options[:after] == "default" || !options[:after]
+      config.run_hook_for(:before, :commit, version)
       guarded_system("git add #{DIR}")
       guarded_system("git add #{Releasetool::Util.version_file}") if File.exist?(Releasetool::Util.version_file)
       args = ["git", "commit", DIR]
@@ -88,7 +91,7 @@ class Release < Thor
       args << "-m" << DEFAULT_COMMIT_MESSAGE
       guarded_system(Shellwords.join(args))
     end
-    config.after_commit_hook(version) if options[:after]
+    config.run_hook_for(:after, :commit, version) if options[:after]
   end
 
   desc "tag (NEW_VERSION)", <<-END
@@ -125,6 +128,7 @@ class Release < Thor
   map %w[--version -v] => :__print_version
 
   desc "--version, -v", "print the version"
+
   def __print_version
     say "Releasetool v#{Releasetool::VERSION}"
   end
