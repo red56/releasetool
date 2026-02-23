@@ -21,7 +21,7 @@ module Releasetool
       hook = :"#{before_after}_#{event}"
       return nil unless hooks.respond_to?(hook)
 
-      hooks.send(hook, version)
+      hooks.public_send(hook, version)
     end
 
     def generate
