@@ -10,7 +10,7 @@ module Releasetool
     def initialize(version, previous:)
       raise "Version must be a Releasetool::Version" unless version.is_a?(Releasetool::Version)
 
-      raise "Previous must be nil or a Releasetool::Version" if previous && !version.is_a?(Releasetool::Version)
+      raise "Previous must be nil or a Releasetool::Version" if previous && !previous.is_a?(Releasetool::Version)
 
       @version = version
       @previous = previous
